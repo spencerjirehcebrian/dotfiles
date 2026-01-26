@@ -6,6 +6,13 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # ===========================
+# Auto-start tmux in Ghostty
+# ===========================
+if [[ -z "$TMUX" ]] && [[ -n "$GHOSTTY_RESOURCES_DIR" ]]; then
+  exec tmux new-session -A -s main
+fi
+
+# ===========================
 # Startup Profiler (optional)
 # ===========================
 # Uncomment the next line to enable startup profiling
@@ -85,19 +92,19 @@ vim-mode() {
 }
 
 # Cursor shape indicator for vim mode
-# function zle-keymap-select {
-#   if [[ $KEYMAP == vicmd ]]; then
-#     echo -ne '\e[2 q'  # Block cursor
-#   else
-#     echo -ne '\e[6 q'  # Beam cursor
-#   fi
-# }
-# zle -N zle-keymap-select
+function zle-keymap-select {
+  if [[ $KEYMAP == vicmd ]]; then
+    echo -ne '\e[2 q'  # Block cursor
+  else
+    echo -ne '\e[6 q'  # Beam cursor
+  fi
+}
+zle -N zle-keymap-select
 
-# function zle-line-init {
-#   echo -ne '\e[6 q'
-# }
-# zle -N zle-line-init
+function zle-line-init {
+  echo -ne '\e[6 q'
+}
+zle -N zle-line-init
 
 # ===========================
 # Completion System
@@ -269,6 +276,11 @@ alias opc="opencode"
 alias cld="claude"
 alias ccd="claude --dangerously-skip-permissions"
 alias rm="/opt/homebrew/opt/trash/bin/trash"
+
+# tmux
+alias tm="tmux attach || tmux new"
+alias tls="tmux list-sessions"
+alias tks="tmux kill-session -t"
 
 # Navigation shortcuts
 alias ..="cd .."
