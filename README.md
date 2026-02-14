@@ -1,165 +1,133 @@
 # Dotfiles
 
-Personal configuration files for my development environment.
+Personal development environment for macOS and Linux.
 
 ## What's Inside
 
-This repository contains configuration files for:
+- **Ghostty** - GPU-accelerated terminal (renderer only, titlebar hidden)
+- **tmux** - Window/pane management, vi-style copy mode
+- **Zsh** - Shell with Oh My Zsh, Powerlevel10k, and vi mode
+- **Neovim** - Single-file config (`init.lua`) with lazy.nvim
 
-- **Ghostty** - Terminal emulator (renderer only)
-- **tmux** - Terminal multiplexer (window/pane management, copy mode, search)
-- **Zsh** - Shell configuration with Oh My Zsh and vim mode
-- **Powerlevel10k** - Zsh prompt theme
-- **Neovim** - Text editor configuration
+All tools share the **Vesper** color scheme (`#101010` bg, `#ffffff` fg, `#ffc799` accent).
 
 ## Installation
 
 ### Prerequisites
 
-```bash
-brew install ghostty tmux neovim
-```
-
-Also install:
+- [Homebrew](https://brew.sh/)
 - [Oh My Zsh](https://ohmyz.sh/)
-- [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
 
-### Fresh Installation
-
-Clone this repository and run the install script:
+### Setup
 
 ```bash
-git clone git@github-personal:spencerjirehcebrian/dotfiles.git ~/.dotfiles
+git clone git@github.com:spencerjireh/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ./install.sh
 ```
 
 ### What the Install Script Does
 
-The script creates symlinks for:
+1. **Installs brew packages**: neovim, tmux, fzf, fd, eza, bat, ripgrep, git-delta, zoxide, pyenv, imagemagick, trash, GohuFont Nerd Font
+2. **Creates symlinks** (with automatic backup of existing files):
+   - `ghostty/config` → Ghostty config dir (platform-aware)
+   - `tmux/tmux.conf` → `~/.tmux.conf`
+   - `zsh/.zshrc` → `~/.zshrc`
+   - `zsh/.p10k.zsh` → `~/.p10k.zsh`
+   - `nvim/` → `~/.config/nvim`
+3. **Sets up plugins**: TPM (tmux), zsh-autosuggestions, zsh-syntax-highlighting, powerlevel10k
+4. **Optional (interactive prompts)**:
+   - GitHub SSH key + CLI setup
+   - Global Git config (name, email, delta pager)
+   - macOS defaults (key repeat, Finder, Dock, trackpad, screenshots)
 
-- Ghostty config: `~/Library/Application Support/com.mitchellh.ghostty/config`
-- tmux config: `~/.tmux.conf`
-- Zsh configuration: `~/.zshrc`
-- Powerlevel10k theme: `~/.p10k.zsh`
-- Neovim configuration: `~/.config/nvim`
+### Uninstallation
+
+```bash
+./uninstall.sh  # Removes symlinks, restores backups
+```
 
 ## Directory Structure
 
 ```
-~/.dotfiles/
 ├── ghostty/
-│   └── config              # Ghostty terminal configuration
+│   └── config
 ├── tmux/
-│   └── tmux.conf           # tmux configuration
+│   └── tmux.conf
 ├── zsh/
-│   ├── .zshrc              # Zsh shell configuration
-│   └── .p10k.zsh           # Powerlevel10k theme settings
+│   ├── .zshrc
+│   └── .p10k.zsh
 ├── nvim/
-│   └── ...                 # Neovim configuration
-└── install.sh              # Installation script
+│   ├── init.lua
+│   └── lazy-lock.json
+├── install.sh
+└── uninstall.sh
 ```
 
 ## tmux Keybinds
 
-Prefix: `cmd+shift+space` (Ghostty translates to ctrl+space for tmux)
+Prefix: `Cmd+Shift+Space` (Ghostty translates to `Ctrl+Space`)
+
+### Navigation
+
+| Action | Keys |
+|--------|------|
+| Seamless pane/vim nav | `C-h/j/k/l` (no prefix) |
+| Navigate panes | `prefix + h/j/k/l` |
+| Window by number | `Alt+1-9` (no prefix) |
+| Next/prev window | `prefix + n/p` |
 
 ### Copy Mode
 
 | Action | Keys |
 |--------|------|
-| Enter copy mode | `prefix + v` |
-| Search forward | `/` |
-| Search backward | `?` |
+| Enter copy mode | `prefix + Enter` |
 | Start selection | `v` |
+| Select line | `V` |
 | Yank to clipboard | `y` |
-| Exit copy mode | `Escape` |
+| Exit | `Escape` |
 
-### Panes
-
-| Action | Keys |
-|--------|------|
-| Navigate | `prefix + hjkl` |
-| Split vertical | `prefix + \|` |
-| Split horizontal | `prefix + -` |
-| Resize | `prefix + HJKL` |
-| Close pane | `prefix + x` |
-
-### Windows
+### Management
 
 | Action | Keys |
 |--------|------|
+| Split vertical | `prefix + v` or `\|` |
+| Split horizontal | `prefix + s` or `-` |
+| Resize panes | `prefix + H/J/K/L` |
 | New window | `prefix + c` |
-| Next window | `prefix + ctrl+l` |
-| Previous window | `prefix + ctrl+h` |
-| Window by number | `prefix + 1-9` |
 | Close window | `prefix + X` |
-
-### Sessions
-
-| Action | Keys |
-|--------|------|
+| Close pane | `prefix + x` |
 | New session | `prefix + S` |
-| List sessions | `prefix + s` |
-| Detach | `prefix + d` |
+| Session tree | `prefix + w` |
 | Kill session | `prefix + q` |
+| Toggle status bar | `prefix + b` |
+| Reload config | `prefix + r` |
 
-### Auto-start
+tmux auto-starts when opening Ghostty, attaching to the `main` session.
 
-tmux automatically starts when opening Ghostty, attaching to the `main` session or creating it if it doesn't exist.
-
-### Shell Aliases
+## Shell Aliases
 
 ```bash
-tm              # attach existing or create new session
+# tmux
+tm              # attach or create session
 tls             # list sessions
-tks <name>      # kill session by name
-```
+tks <name>      # kill session
 
-## Theme
+# editors & tools
+v               # nvim
+cld             # claude
+ccd             # claude --dangerously-skip-permissions
 
-All tools use the Vesper color scheme:
-
-- Background: `#101010`
-- Foreground: `#ffffff`
-- Accent: `#ffc799` (orange)
-- Selection: `#2a2a2a`
-
-## Making Changes
-
-Since files are symlinked, changes are automatically reflected in this repo:
-
-```bash
-cd ~/.dotfiles
-git add .
-git commit -m "Description of changes"
-git push
-```
-
-## Updating on Another Machine
-
-```bash
-cd ~/.dotfiles
-git pull
+# modern replacements
+ls → eza        # with icons and git status
+cat → bat       # with syntax highlighting
+rm → trash      # safe delete
 ```
 
 ## Troubleshooting
 
-### Symlinks Not Working
+**Symlinks not working** — Re-run `./install.sh`
 
-Recreate them by running:
+**tmux colors wrong** — Ensure terminal reports 256-color. Config sets `default-terminal` to `tmux-256color`.
 
-```bash
-cd ~/.dotfiles
-./install.sh
-```
-
-### tmux Colors Wrong
-
-Ensure your terminal reports as 256-color. The config sets `default-terminal` to `tmux-256color`.
-
-### Permission Issues
-
-```bash
-chmod +x ~/.dotfiles/install.sh
-```
+**tmux plugins not loaded** — Press `prefix + I` inside tmux to install plugins via TPM.
