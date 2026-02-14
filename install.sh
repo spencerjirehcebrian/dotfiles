@@ -11,4 +11,7 @@ ln -sf ~/.dotfiles/zsh/.p10k.zsh ~/.p10k.zsh
 # Neovim
 ln -sf ~/.dotfiles/nvim ~/.config/nvim
 
+# tmux
+ln -sf ~/.dotfiles/tmux/tmux.conf ~/.tmux.conf
+
 echo "Dotfiles installed!"

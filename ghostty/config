@@ -62,9 +62,9 @@ window-padding-x = 4
 window-padding-y = 4
 window-theme = dark
 
-# Hide tabs completely
+# Hide titlebar (tmux handles window management)
 gtk-tabs-location = hidden
-macos-titlebar-style = tabs
+macos-titlebar-style = hidden
 	
 # Shell integration
 shell-integration = detect
@@ -107,12 +107,8 @@ freetype-load-flags = no-hinting
 window-height = 9999
 window-width = 9999
 
-# Tab Navigation
-keybind = cmd+shift+h=previous_tab
-keybind = cmd+shift+l=next_tab
+# Window management handled by tmux
+# See ~/.dotfiles/tmux/tmux.conf
 
-# Split Navigation
-keybind = cmd+ctrl+h=goto_split:left
-keybind = cmd+ctrl+j=goto_split:bottom
-keybind = cmd+ctrl+k=goto_split:top
-keybind = cmd+ctrl+l=goto_split:right
+# Translate cmd+shift+space to ctrl+space for tmux prefix
+keybind = cmd+shift+space=text:\x00
