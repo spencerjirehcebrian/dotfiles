@@ -455,37 +455,7 @@ Fast file navigation using persistent marks for frequently accessed files.
 
 ---
 
-### 17. Markdown Preview
-**Plugin**: `iamcco/markdown-preview.nvim`
-
-Browser-based live preview for markdown files with auto-refresh.
-
-**Features**:
-- Real-time preview in your default browser
-- Auto-scrolls to cursor position
-- Supports GitHub-flavored markdown
-- Renders code blocks with syntax highlighting
-- Shows images, tables, and diagrams
-- Live updates as you type
-
-**Keybindings**:
-- `<Space>mp` - Toggle markdown preview in browser
-
-**Usage**:
-1. Open a markdown file
-2. Press `<Space>mp` to launch preview in browser
-3. Edit your markdown - preview updates automatically
-4. Preview shows exactly where your cursor is
-5. Press `<Space>mp` again to close preview
-
-**Tips**:
-- Great for writing documentation, READMEs, or blog posts
-- Preview stays synced even when switching between files
-- Works alongside render-markdown for in-editor previewing
-
----
-
-### 18. Render Markdown
+### 17. Render Markdown
 **Plugin**: `MeanderingProgrammer/render-markdown.nvim`
 
 In-buffer markdown rendering with beautiful syntax and icons.
@@ -522,7 +492,7 @@ In-buffer markdown rendering with beautiful syntax and icons.
 
 ---
 
-### 19. Image.nvim
+### 18. Image.nvim
 **Plugin**: `3rd/image.nvim`
 
 Inline image viewing within Neovim using Kitty graphics protocol.
@@ -561,7 +531,7 @@ Inline image viewing within Neovim using Kitty graphics protocol.
 
 ---
 
-### 20. Rainbow CSV
+### 19. Rainbow CSV
 **Plugin**: `cameron-wags/rainbow_csv.nvim`
 
 Syntax highlighting for CSV and TSV files with column visualization.
@@ -742,7 +712,7 @@ vim.lsp.enable("server_name")
 - `<Space>op` - Navigate to previous mark
 
 ### Markdown
-- `<Space>mp` - Toggle markdown preview (browser)
+- `<Space>mp` - Open markdown file in browser
 - `<Space>tr` - Toggle render markdown (in-buffer)
 
 ### Images and External Files
@@ -786,7 +756,7 @@ vim.lsp.enable("server_name")
 
 6. **Markdown Editing**:
    - In-buffer rendering with `<Space>tr` for quick previews
-   - Browser preview with `<Space>mp` for final review
+   - Open in browser with `<Space>mp` for final review
    - Images display automatically in Kitty terminal
    - Use `<Space>io` to open PDFs or Office docs externally
 
@@ -834,9 +804,8 @@ vim.lsp.enable("server_name")
 
 **Markdown Workflow**:
 - Use `<Space>tr` for in-buffer preview while editing
-- Use `<Space>mp` for browser preview when sharing or presenting
-- Both can be used together - in-buffer for quick checks, browser for final review
-- Images render inline automatically in markdown files
+- Use `<Space>mp` to open the file in your default browser
+- Images render inline automatically in markdown files (Kitty terminal)
 - Great for writing documentation, READMEs, or technical blog posts
 
 **Rainbow CSV**:
@@ -922,7 +891,7 @@ Look for `vim.keymap.set()` calls in `init.lua` and modify as needed.
 | `<Space>oo` | Harpoon menu |
 | `<Space>o1-5` | Jump to mark 1-5 |
 | `<Space>on/op` | Next/previous mark |
-| `<Space>mp` | Markdown preview |
+| `<Space>mp` | Open markdown in browser |
 | `<Space>tr` | Toggle markdown render |
 | `<Space>io` | Open file externally |
 | `gh/gl` | Jump history back/forward |
