@@ -431,6 +431,7 @@ require("lazy").setup({
             width = 30,
             mappings = {
               ["<space>"] = "none",
+              ["H"] = "toggle_hidden", -- Shift-H to toggle hidden files
             },
           },
           filesystem = {
@@ -438,6 +439,12 @@ require("lazy").setup({
               visible = true, -- Show hidden files by default
               hide_dotfiles = false,
               hide_gitignored = false,
+              hide_by_name = {
+                ".git",
+              },
+              never_show = {
+                ".DS_Store",
+              },
             },
             follow_current_file = {
               enabled = true,
