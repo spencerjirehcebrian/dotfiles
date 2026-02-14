@@ -108,10 +108,8 @@ window-height = 9999
 window-width = 9999
 
 # Tab Navigation
-keybind = cmd+shift+h=move_tab:-1
-keybind = cmd+shift+j=previous_tab
-keybind = cmd+shift+k=next_tab
-keybind = cmd+shift+l=move_tab:1
+keybind = cmd+shift+h=previous_tab
+keybind = cmd+shift+l=next_tab
 
 # Split Navigation
 keybind = cmd+ctrl+h=goto_split:left
