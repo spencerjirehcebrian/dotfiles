@@ -159,6 +159,9 @@ fi
 # ===========================
 # Path Configuration
 # ===========================
+# Python 3.12 from Homebrew 
+export PATH="/opt/homebrew/opt/python@3.12/libexec/bin:$PATH"
+
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 

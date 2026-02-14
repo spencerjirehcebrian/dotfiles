@@ -2,6 +2,27 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+-- Python provider (use Python 3.10+ for molten)
+-- Try to find python3.12, python3.11, python3.10 in order, fallback to python3
+local function find_python()
+  local candidates = {
+    vim.fn.exepath("python3.12"),
+    vim.fn.exepath("python3.11"),
+    vim.fn.exepath("python3.10"),
+    vim.fn.exepath("python3"),
+  }
+
+  for _, python in ipairs(candidates) do
+    if python ~= "" then
+      return python
+    end
+  end
+
+  return "python3" -- fallback
+end
+
+vim.g.python3_host_prog = find_python()
+
 -- Line numbers
 vim.opt.number = true
 vim.opt.relativenumber = true
@@ -151,6 +172,11 @@ require("lazy").setup({
         vim.api.nvim_set_hl(0, "WhichKeyNormal", { bg = "#101010" })
         vim.api.nvim_set_hl(0, "WhichKeyBorder", { fg = "#80d9c7", bg = "#101010" })
         vim.api.nvim_set_hl(0, "WhichKeyTitle", { fg = "#ffc799", bg = "#101010", bold = true })
+
+        -- Customize floating windows (Harpoon, etc.) to match Vesper theme colors
+        vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#101010" })
+        vim.api.nvim_set_hl(0, "FloatBorder", { fg = "#80d9c7", bg = "#101010" })
+        vim.api.nvim_set_hl(0, "FloatTitle", { fg = "#ffc799", bg = "#101010", bold = true })
       end,
     },
 
@@ -212,7 +238,7 @@ require("lazy").setup({
       config = function()
         require("mason").setup()
         require("mason-lspconfig").setup({
-          ensure_installed = { "lua_ls" }, -- Add language servers you need
+          ensure_installed = { "lua_ls", "pyright" },
         })
 
         -- Get capabilities from cmp
@@ -241,9 +267,11 @@ require("lazy").setup({
         })
         vim.lsp.enable("lua_ls")
 
+        -- Python LSP
+        vim.lsp.config("pyright", { capabilities = capabilities })
+        vim.lsp.enable("pyright")
+
         -- Add more LSP servers here as needed
-        -- vim.lsp.config("pyright", { capabilities = capabilities })
-        -- vim.lsp.enable("pyright")
         -- vim.lsp.config("ts_ls", { capabilities = capabilities })
         -- vim.lsp.enable("ts_ls")
 
@@ -279,7 +307,7 @@ require("lazy").setup({
         },
         {
           "<leader>cl",
-          "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+          "<cmd>Trouble lsp toggle focus=false win.position=left<cr>",
           desc = "LSP definitions / references / ... (Trouble)",
         },
         {
@@ -434,6 +462,55 @@ require("lazy").setup({
       end,
     },
 
+    -- Harpoon (quick file navigation)
+    {
+      "ThePrimeagen/harpoon",
+      branch = "harpoon2",
+      dependencies = { "nvim-lua/plenary.nvim" },
+      event = "VeryLazy",
+      config = function()
+        local harpoon = require("harpoon")
+
+        harpoon:setup({
+          settings = {
+            save_on_toggle = false,
+            sync_on_ui_close = true,
+            key = function()
+              return vim.loop.cwd()
+            end,
+          },
+          menu = {
+            width = vim.api.nvim_win_get_width(0) - 4,
+          },
+        })
+
+        -- Keymaps using <leader>o prefix
+        vim.keymap.set("n", "<leader>oa", function()
+          harpoon:list():add()
+        end, { desc = "Add file to Harpoon" })
+
+        vim.keymap.set("n", "<leader>oo", function()
+          harpoon.ui:toggle_quick_menu(harpoon:list())
+        end, { desc = "Open Harpoon menu" })
+
+        -- Quick jump to marks 1-5
+        for i = 1, 5 do
+          vim.keymap.set("n", "<leader>o" .. i, function()
+            harpoon:list():select(i)
+          end, { desc = "Jump to Harpoon mark " .. i })
+        end
+
+        -- Navigate between marks
+        vim.keymap.set("n", "<leader>on", function()
+          harpoon:list():next()
+        end, { desc = "Next Harpoon mark" })
+
+        vim.keymap.set("n", "<leader>op", function()
+          harpoon:list():prev()
+        end, { desc = "Previous Harpoon mark" })
+      end,
+    },
+
     -- which-key.nvim (keymap hints)
     {
       "folke/which-key.nvim",
@@ -484,11 +561,21 @@ require("lazy").setup({
           { "<leader>c", group = "Code/LSP" },
           { "<leader>t", group = "Toggle" },
           { "<leader>m", group = "Markdown" },
+          { "<leader>o", group = "Harpoon" },
           { "<leader>w", desc = "Save file" },
           { "<leader>q", desc = "Quit window" },
           { "<leader>e", desc = "Focus file explorer" },
           { "<leader>mp", desc = "Markdown preview" },
           { "<leader>tr", desc = "Toggle render markdown" },
+          { "<leader>oa", desc = "Add to Harpoon" },
+          { "<leader>oo", desc = "Open Harpoon menu" },
+          { "<leader>o1", desc = "Jump to mark 1" },
+          { "<leader>o2", desc = "Jump to mark 2" },
+          { "<leader>o3", desc = "Jump to mark 3" },
+          { "<leader>o4", desc = "Jump to mark 4" },
+          { "<leader>o5", desc = "Jump to mark 5" },
+          { "<leader>on", desc = "Next mark" },
+          { "<leader>op", desc = "Previous mark" },
           { "<leader>h", desc = "Go to left window" },
           { "<leader>j", desc = "Go to bottom window" },
           { "<leader>k", desc = "Go to top window" },
