@@ -36,6 +36,30 @@ vim.opt.termguicolors = true
 -- Hide end-of-buffer tildes
 vim.opt.fillchars:append({ eob = " " })
 
+-- Auto-reload files changed outside of Neovim
+vim.opt.autoread = true
+
+-- Trigger checktime on focus/buffer changes
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
+  pattern = "*",
+  callback = function()
+    if vim.fn.mode() ~= "c" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+
+-- Notify when file changes externally
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  pattern = "*",
+  callback = function()
+    vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.WARN)
+  end,
+})
+
+-- Manual reload keymap
+vim.keymap.set("n", "<leader>cr", "<cmd>checktime<cr>", { desc = "Check/reload files" })
+
 -- Window navigation
 vim.keymap.set("n", "<leader>h", "<C-w>h", { desc = "Move to left window" })
 vim.keymap.set("n", "<leader>j", "<C-w>j", { desc = "Move to bottom window" })
@@ -126,17 +150,14 @@ require("lazy").setup({
             "python",
           },
           sync_install = false,
+          auto_install = false,
+          ignore_install = {},
+          modules = {},
           highlight = {
             enable = true,
           },
-          indent = { 
+          indent = {
             enable = true,
-          },
-          autotage = {
-            enable = true,
-          },
-          auto_install = {
-            enable = false,
           },
         })
       end,
@@ -161,6 +182,23 @@ require("lazy").setup({
         -- Setup lua_ls using new API
         vim.lsp.config("lua_ls", {
           capabilities = capabilities,
+          settings = {
+            Lua = {
+              runtime = {
+                version = "LuaJIT",
+              },
+              diagnostics = {
+                globals = { "vim" },
+              },
+              workspace = {
+                library = vim.api.nvim_get_runtime_file("", true),
+                checkThirdParty = false,
+              },
+              telemetry = {
+                enable = false,
+              },
+            },
+          },
         })
         vim.lsp.enable("lua_ls")
 
@@ -344,6 +382,36 @@ require("lazy").setup({
       "lewis6991/gitsigns.nvim",
       config = function()
         require("gitsigns").setup()
+      end,
+    },
+
+    -- Satellite (scrollbar with decorations)
+    {
+      "lewis6991/satellite.nvim",
+      config = function()
+        require("satellite").setup({
+          current_only = false,
+          winblend = 0,
+          width = 4,
+          handlers = {
+            cursor = {
+              enable = true,
+            },
+            search = {
+              enable = true,
+            },
+            diagnostic = {
+              enable = true,
+            },
+            gitsigns = {
+              enable = true,
+            },
+            marks = {
+              enable = true,
+              show_builtins = false,
+            },
+          },
+        })
       end,
     },
 

@@ -2,12 +2,8 @@
 # Peppermint & orange flavored dark theme with hidden tabs
 
 # Font Configuration
-# Try one of these if icons don't show:
-# font-family = "JetBrainsMono Nerd Font"
-# font-family = "FiraCode Nerd Font"
-# font-family = "Hack Nerd Font"
-font-family = "GohuFont Nerd Font"
-font-size = 14
+font-family = "GohuFont 14 Nerd Font Mono"
+font-size = 16
 font-feature = ss01
 font-feature = ss02
 font-feature = ss03
