@@ -4,15 +4,7 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-log_info()  { echo -e "${GREEN}[INFO]${NC}  $1"; }
-log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1" >&2; }
+source "$DOTFILES_DIR/lib/log.sh"
 
 remove_symlink() {
     local dest="$1"
@@ -56,15 +48,17 @@ fi
 
 log_info "Removing symlinks..."
 
-remove_symlink ~/Library/Application\ Support/com.mitchellh.ghostty/config \
+remove_symlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config" \
     "$DOTFILES_DIR/ghostty/config"
 
-remove_symlink ~/.zshrc "$DOTFILES_DIR/zsh/.zshrc"
-remove_symlink ~/.p10k.zsh "$DOTFILES_DIR/zsh/.p10k.zsh"
+remove_symlink "$HOME/.zshrc" "$DOTFILES_DIR/zsh/.zshrc"
+remove_symlink "$HOME/.p10k.zsh" "$DOTFILES_DIR/zsh/.p10k.zsh"
 
-remove_symlink ~/.config/nvim "$DOTFILES_DIR/nvim"
+remove_symlink "$HOME/.config/nvim" "$DOTFILES_DIR/nvim"
 
-remove_symlink ~/.tmux.conf "$DOTFILES_DIR/tmux/tmux.conf"
+remove_symlink "$HOME/.tmux.conf" "$DOTFILES_DIR/tmux/tmux.conf"
+
+remove_symlink "$HOME/.gitaliases" "$DOTFILES_DIR/git/aliases"
 
 echo "========================================"
 log_info "Dotfiles symlinks removed."

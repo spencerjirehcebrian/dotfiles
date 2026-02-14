@@ -4,15 +4,7 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-log_info()  { echo -e "${GREEN}[INFO]${NC}  $1"; }
-log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1" >&2; }
+source "$DOTFILES_DIR/lib/log.sh"
 
 create_symlink() {
     local src="$1"
@@ -40,6 +32,27 @@ create_symlink() {
 
     ln -sf "$src" "$dest"
     log_info "Linked: $dest -> $src"
+}
+
+clone_or_pull() {
+    local dest="$1"; shift
+    if [ ! -d "$dest" ]; then
+        git clone "$@" "$dest"
+        log_info "Installed $(basename "$dest")"
+    else
+        git -C "$dest" pull --quiet
+        log_info "Updated $(basename "$dest")"
+    fi
+}
+
+brew_install() {
+    local type="$1" pkg="$2"
+    if brew list ${type:+--$type} "$pkg" &>/dev/null; then
+        log_warn "$pkg already installed, skipping"
+    else
+        brew install ${type:+--$type} "$pkg"
+        log_info "Installed $pkg"
+    fi
 }
 
 # OS detection
@@ -89,24 +102,14 @@ else
 fi
 
 for formula in "${BREW_FORMULAE[@]}"; do
-    if brew list "$formula" &>/dev/null; then
-        log_warn "$formula already installed, skipping"
-    else
-        brew install "$formula"
-        log_info "Installed $formula"
-    fi
+    brew_install "" "$formula"
 done
 
 # Font installation (casks are macOS-only)
 if [[ "$OS" == "macos" ]]; then
     BREW_CASKS=(font-gohufont-nerd-font)
     for cask in "${BREW_CASKS[@]}"; do
-        if brew list --cask "$cask" &>/dev/null; then
-            log_warn "$cask already installed, skipping"
-        else
-            brew install --cask "$cask"
-            log_info "Installed $cask"
-        fi
+        brew_install "cask" "$cask"
     done
 else
     FONT_DIR="$HOME/.local/share/fonts"
@@ -134,8 +137,7 @@ else
     git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
     log_info "Installed TPM"
 fi
-"$HOME/.tmux/plugins/tpm/bin/install_plugins"
-log_info "Installed TPM plugins"
+"$HOME/.tmux/plugins/tpm/bin/install_plugins" || log_warn "TPM plugin install failed (is tmux running?)"
 
 # Ghostty
 log_info "Setting up Ghostty..."
@@ -149,46 +151,29 @@ create_symlink "$DOTFILES_DIR/ghostty/config" "$GHOSTTY_DIR/config"
 
 # Zsh
 log_info "Setting up Zsh..."
-create_symlink "$DOTFILES_DIR/zsh/.zshrc" ~/.zshrc
-create_symlink "$DOTFILES_DIR/zsh/.p10k.zsh" ~/.p10k.zsh
+create_symlink "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
+create_symlink "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
 
 # Neovim
 log_info "Setting up Neovim..."
-mkdir -p ~/.config
-create_symlink "$DOTFILES_DIR/nvim" ~/.config/nvim
+mkdir -p "$HOME/.config"
+create_symlink "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 
 # tmux
 log_info "Setting up tmux..."
-create_symlink "$DOTFILES_DIR/tmux/tmux.conf" ~/.tmux.conf
+create_symlink "$DOTFILES_DIR/tmux/tmux.conf" "$HOME/.tmux.conf"
 
 # Oh My Zsh plugins and theme
 log_info "Setting up Oh My Zsh plugins and theme..."
 
 OMZ_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
-if [ ! -d "$OMZ_CUSTOM/plugins/zsh-autosuggestions" ]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions "$OMZ_CUSTOM/plugins/zsh-autosuggestions"
-    log_info "Installed zsh-autosuggestions"
-else
-    git -C "$OMZ_CUSTOM/plugins/zsh-autosuggestions" pull --quiet
-    log_info "Updated zsh-autosuggestions"
-fi
-
-if [ ! -d "$OMZ_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting "$OMZ_CUSTOM/plugins/zsh-syntax-highlighting"
-    log_info "Installed zsh-syntax-highlighting"
-else
-    git -C "$OMZ_CUSTOM/plugins/zsh-syntax-highlighting" pull --quiet
-    log_info "Updated zsh-syntax-highlighting"
-fi
-
-if [ ! -d "$OMZ_CUSTOM/themes/powerlevel10k" ]; then
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$OMZ_CUSTOM/themes/powerlevel10k"
-    log_info "Installed powerlevel10k"
-else
-    git -C "$OMZ_CUSTOM/themes/powerlevel10k" pull --quiet
-    log_info "Updated powerlevel10k"
-fi
+clone_or_pull "$OMZ_CUSTOM/plugins/zsh-autosuggestions" \
+    https://github.com/zsh-users/zsh-autosuggestions
+clone_or_pull "$OMZ_CUSTOM/plugins/zsh-syntax-highlighting" \
+    https://github.com/zsh-users/zsh-syntax-highlighting
+clone_or_pull "$OMZ_CUSTOM/themes/powerlevel10k" \
+    --depth=1 https://github.com/romkatv/powerlevel10k.git
 
 # GitHub SSH + CLI
 read -rp "Set up GitHub SSH + CLI? [Y/n] " setup_github
@@ -196,21 +181,24 @@ setup_github="${setup_github:-Y}"
 
 if [[ "$setup_github" =~ ^[Yy]$ ]]; then
     log_info "Setting up GitHub SSH..."
-    mkdir -p ~/.ssh
-    chmod 700 ~/.ssh
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
 
     if [ -f "$HOME/.ssh/id_ed25519_github" ]; then
         log_warn "GitHub SSH key already exists, skipping generation"
     else
         read -rp "Enter your GitHub email: " github_email
-        ssh-keygen -t ed25519 -C "$github_email" -f ~/.ssh/id_ed25519_github -N ""
+        ssh-keygen -t ed25519 -C "$github_email" -f "$HOME/.ssh/id_ed25519_github" -N ""
         log_info "Generated GitHub SSH key"
     fi
 
-    if grep -q "Host github.com" ~/.ssh/config 2>/dev/null; then
+    touch "$HOME/.ssh/config"
+    chmod 600 "$HOME/.ssh/config"
+
+    if grep -q "Host github.com" "$HOME/.ssh/config" 2>/dev/null; then
         log_warn "GitHub SSH config already exists, skipping"
     else
-        cat >> ~/.ssh/config <<'EOF'
+        cat >> "$HOME/.ssh/config" <<'EOF'
 
 # Personal GitHub
 Host github.com
@@ -219,8 +207,7 @@ Host github.com
     IdentityFile ~/.ssh/id_ed25519_github
     IdentitiesOnly yes
 EOF
-        chmod 600 ~/.ssh/config
-        log_info "Added GitHub host to ~/.ssh/config"
+        log_info "Added GitHub host to $HOME/.ssh/config"
     fi
 
     if ! command -v gh &>/dev/null; then
@@ -235,7 +222,7 @@ fi
 
 # Git aliases
 log_info "Setting up Git aliases..."
-create_symlink "$DOTFILES_DIR/git/aliases" ~/.gitaliases
+create_symlink "$DOTFILES_DIR/git/aliases" "$HOME/.gitaliases"
 
 # Git configuration
 read -rp "Set up global Git config? [Y/n] " setup_git
@@ -244,7 +231,7 @@ setup_git="${setup_git:-Y}"
 if [[ "$setup_git" =~ ^[Yy]$ ]]; then
     log_info "Setting up Git config..."
 
-    git config --global include.path ~/.gitaliases
+    git config --global include.path "$HOME/.gitaliases"
     log_info "Included git aliases via include.path"
 
     current_name="$(git config --global user.name 2>/dev/null || true)"
