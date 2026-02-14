@@ -434,6 +434,11 @@ require("lazy").setup({
             },
           },
           filesystem = {
+            filtered_items = {
+              visible = true, -- Show hidden files by default
+              hide_dotfiles = false,
+              hide_gitignored = false,
+            },
             follow_current_file = {
               enabled = true,
             },
@@ -449,6 +454,13 @@ require("lazy").setup({
             vim.opt_local.foldenable = false
           end,
         })
+        
+        -- Customize Neo-tree colors to match Vesper theme
+        vim.api.nvim_set_hl(0, "NeoTreeFloatBorder", { fg = "#80d9c7", bg = "#101010" })
+        vim.api.nvim_set_hl(0, "NeoTreeFloatTitle", { fg = "#ffc799", bg = "#101010", bold = true })
+        vim.api.nvim_set_hl(0, "NeoTreeTitleBar", { fg = "#ffc799", bg = "#101010", bold = true })
+        vim.api.nvim_set_hl(0, "NeoTreeNormal", { bg = "NONE" })
+        vim.api.nvim_set_hl(0, "NeoTreeNormalNC", { bg = "NONE" })
         
         vim.keymap.set("n", "-", "<CMD>Neotree toggle<CR>", { desc = "Toggle Neo-tree" })
         vim.keymap.set("n", "<leader>e", "<CMD>Neotree focus<CR>", { desc = "Focus Neo-tree" })
@@ -897,7 +909,7 @@ require("lazy").setup({
 
   },
   install = { colorscheme = { "vesper" } },
-  checker = { enabled = true },
+  checker = { enabled = false },
 })
 
 -- External file opener for PDFs and Office documents
